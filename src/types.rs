@@ -44,3 +44,20 @@ pub struct ResponseBuses {
     pub summary: Summary,
     pub resources: Vec<RawBus>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RawStop {
+    #[serde(rename = "dc:identifier")]
+    id: String,
+    #[serde(rename = "ayto:parada")]
+    name: String,
+    #[serde(rename = "dc:modified")]
+    modification_date: String,
+    #[serde(rename = "wgs84_pos:lat")]
+    wgs84_pos_lat: String,
+    #[serde(rename = "wgs84_pos:long")]
+    wgs84_pos_long: String,
+    #[serde(rename = "ayto:numero")]
+    number: String,
+    uri: String,
+}

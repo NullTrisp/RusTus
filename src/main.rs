@@ -5,7 +5,7 @@ use serde_json;
 mod actions;
 mod types;
 
-#[get("/")]
+#[get("/buses")]
 async fn read_all() -> Result<HttpResponse, Error> {
     let buses = actions::get_buses().await.unwrap();
 
@@ -14,13 +14,18 @@ async fn read_all() -> Result<HttpResponse, Error> {
         .body(format!("{}", serde_json::to_string(&buses).unwrap())))
 }
 
-#[get("/{number}")]
+#[get("/buses/{number}")]
 async fn read(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
-    let buses = actions::get_bus(path.into_inner().0).await.unwrap();
+    let bus = actions::get_bus(path.into_inner().0).await.unwrap();
 
-    Ok(HttpResponse::build(StatusCode::OK)
-        .content_type(ContentType::json())
-        .body(format!("{}", serde_json::to_string(&buses).unwrap())))
+    match bus {
+        Some(bus_found) => Ok(HttpResponse::build(StatusCode::OK)
+            .content_type(ContentType::json())
+            .body(format!("{}", serde_json::to_string(&bus_found).unwrap()))),
+        None => Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+            .content_type(ContentType::json())
+            .body("")),
+    }
 }
 
 #[actix_web::main]

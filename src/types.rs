@@ -12,11 +12,10 @@ pub struct RawBus {
     uri: String,
 }
 
-#[derive(Serialize)]
-pub struct Bus {
-    pub number: String,
-    pub destinations: Destinations,
-    pub id: i32,
+impl fmt::Display for RawBus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {} {} {}", self.number, self.name, self.id, self.uri)
+    }
 }
 
 #[derive(Serialize)]
@@ -25,10 +24,11 @@ pub struct Destinations {
     pub b: Option<Vec<String>>,
 }
 
-impl fmt::Display for RawBus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {} {}", self.number, self.name, self.id, self.uri)
-    }
+#[derive(Serialize)]
+pub struct Bus {
+    pub number: String,
+    pub destinations: Destinations,
+    pub id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -40,7 +40,7 @@ pub struct Summary {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Response {
+pub struct ResponseBuses {
     pub summary: Summary,
     pub resources: Vec<RawBus>,
 }

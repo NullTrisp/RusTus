@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{get, http::header::ContentType, web, App, Error, HttpResponse, HttpServer};
 use reqwest::StatusCode;
 
@@ -68,6 +69,7 @@ async fn read_estimation(path: web::Path<(String,)>) -> Result<HttpResponse, Err
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .wrap(Cors::default().allowed_origin(""))
             .service(read_all_buses)
             .service(read_bus)
             .service(read_all_stops)

@@ -6,7 +6,7 @@ mod actions;
 mod types;
 
 #[get("/buses")]
-async fn read_all() -> Result<HttpResponse, Error> {
+async fn read_all_buses() -> Result<HttpResponse, Error> {
     let buses = actions::get_buses().await.unwrap();
 
     Ok(HttpResponse::build(StatusCode::OK)
@@ -14,8 +14,8 @@ async fn read_all() -> Result<HttpResponse, Error> {
         .body(format!("{}", serde_json::to_string(&buses).unwrap())))
 }
 
-#[get("/buses/{number}")]
-async fn read(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
+#[get("/buses/{bus_number}")]
+async fn read_bus(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
     let bus = actions::get_bus(path.into_inner().0).await.unwrap();
 
     match bus {
@@ -28,10 +28,45 @@ async fn read(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
     }
 }
 
+#[get("/stops")]
+async fn read_all_stops(params: web::Query<types::Offest>) -> Result<HttpResponse, Error> {
+    match actions::get_stops(params.into_inner()).await {
+        Ok(buses) => Ok(HttpResponse::build(StatusCode::OK)
+            .content_type(ContentType::json())
+            .body(format!("{}", serde_json::to_string(&buses).unwrap()))),
+        Err(err) => Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+            .content_type(ContentType::json())
+            .body(format!("{}", err))),
+    }
+}
+
+#[get("/stops/{stop_number}")]
+async fn read_stop(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
+    match actions::get_stop(path.into_inner().0).await {
+        Ok(buses_found) => match buses_found {
+            Some(bus) => Ok(HttpResponse::build(StatusCode::OK)
+                .content_type(ContentType::json())
+                .body(format!("{}", serde_json::to_string(&bus).unwrap()))),
+            None => Ok(HttpResponse::build(StatusCode::NOT_FOUND)
+                .content_type(ContentType::json())
+                .body("")),
+        },
+        Err(err) => Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+            .content_type(ContentType::json())
+            .body(format!("{}", err))),
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(read_all).service(read))
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .service(read_all_buses)
+            .service(read_bus)
+            .service(read_all_stops)
+            .service(read_stop)
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }

@@ -47,17 +47,49 @@ pub struct ResponseBuses {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawStop {
-    #[serde(rename = "dc:identifier")]
-    id: String,
     #[serde(rename = "ayto:parada")]
-    name: String,
+    pub name: String,
     #[serde(rename = "dc:modified")]
     modification_date: String,
     #[serde(rename = "wgs84_pos:lat")]
-    wgs84_pos_lat: String,
+    pub wgs84_pos_lat: String,
     #[serde(rename = "wgs84_pos:long")]
-    wgs84_pos_long: String,
+    pub wgs84_pos_long: String,
     #[serde(rename = "ayto:numero")]
-    number: String,
+    pub number: String,
+    #[serde(rename = "ayto:coordX_ETRS89")]
+    coord_x_extrs89: String,
+    #[serde(rename = "ayto:coordY_ETRS89")]
+    coord_y_extrs89: String,
+    #[serde(rename = "gn:coordX")]
+    coord_x: String,
+    #[serde(rename = "gn:coordY")]
+    coord_y: String,
+    #[serde(rename = "ayto:sentido")]
+    pub direction: String,
+    #[serde(rename = "dc:identifier")]
+    pub id: String,
     uri: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Stop {
+    pub id: i32,
+    pub direction: String,
+    pub name: String,
+    pub latitude: f32,
+    pub longitude: f32,
+    pub number: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ResponseStops {
+    pub summary: Summary,
+    pub resources: Vec<RawStop>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Offest {
+    pub from: i32,
+    pub to: i32,
 }

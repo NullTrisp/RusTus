@@ -129,6 +129,7 @@ pub async fn get_bus(bus_number: String) -> Result<Option<types::Bus>, Error> {
 }
 
 pub async fn get_stops(offset: types::Offest) -> Result<Vec<types::Stop>, Error> {
+    //TODO implement from value (not only to)
     Ok(get_raw_stops(offset)
         .await
         .unwrap()
@@ -159,4 +160,47 @@ pub async fn get_stop(id: String) -> Result<Option<types::Stop>, Error> {
         },
         Err(err) => Err(err),
     }
+}
+
+pub async fn get_raw_estimation(stop: types::Stop) -> Result<Vec<types::RawEstimation>, Error> {
+    let res: types::ResponseEstimations = serde_json::from_str(
+        &reqwest::get(
+            "https://datos.santander.es/api/rest/datasets/control_flotas_estimaciones.json",
+        )
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap(),
+    )
+    .unwrap();
+
+    Ok(res
+        .resources
+        .into_iter()
+        .filter(|estimation| estimation.stop_id.parse::<i32>().unwrap() == stop.id)
+        .collect())
+}
+
+pub async fn get_estimation(stop: types::Stop) -> Result<Vec<types::Estimation>, Error> {
+    Ok(get_raw_estimation(stop)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|raw_estimation| types::Estimation {
+            first: types::EstimationGroup {
+                time: raw_estimation.first_time.parse().unwrap(),
+                distance: raw_estimation.first_distance.parse().unwrap(),
+                destination: raw_estimation.first_destination,
+            },
+            second: types::EstimationGroup {
+                time: raw_estimation.second_time.parse().unwrap(),
+                distance: raw_estimation.second_distance.parse().unwrap(),
+                destination: raw_estimation.second_destination,
+            },
+            stop_id: raw_estimation.stop_id.parse().unwrap(),
+            id: raw_estimation.id.parse().unwrap(),
+            bus_number: raw_estimation.bus_number,
+        })
+        .collect())
 }

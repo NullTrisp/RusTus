@@ -93,3 +93,52 @@ pub struct Offest {
     pub from: i32,
     pub to: i32,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RawEstimation {
+    #[serde(rename = "ayto:tiempo1")]
+    pub first_time: String,
+    #[serde(rename = "ayto:distancia1")]
+    pub first_distance: String,
+    #[serde(rename = "ayto:destino1")]
+    pub first_destination: String,
+    #[serde(rename = "ayto:tiempo2")]
+    pub second_time: String,
+    #[serde(rename = "ayto:distancia2")]
+    pub second_distance: String,
+    #[serde(rename = "ayto:destino2")]
+    pub second_destination: String,
+    #[serde(rename = "ayto:paradaId")]
+    pub stop_id: String,
+    #[serde(rename = "ayto:fechActual")]
+    now_date: String,
+    #[serde(rename = "dc:modified")]
+    modified_date: String,
+    #[serde(rename = "dc:identifier")]
+    pub id: String,
+    #[serde(rename = "ayto:etiqLinea")]
+    pub bus_number: String,
+    uri: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ResponseEstimations {
+    pub summary: Summary,
+    pub resources: Vec<RawEstimation>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EstimationGroup {
+    pub time: i32,
+    pub distance: i32,
+    pub destination: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Estimation {
+    pub first: EstimationGroup,
+    pub second: EstimationGroup,
+    pub stop_id: i32,
+    pub id: i32,
+    pub bus_number: String,
+}

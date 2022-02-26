@@ -1,6 +1,5 @@
 use actix_web::{get, http::header::ContentType, web, App, Error, HttpResponse, HttpServer};
 use reqwest::StatusCode;
-use serde_json;
 
 mod actions;
 mod types;
@@ -9,9 +8,7 @@ mod types;
 async fn read_all_buses() -> Result<HttpResponse, Error> {
     let buses = actions::get_buses().await.unwrap();
 
-    Ok(HttpResponse::build(StatusCode::OK)
-        .content_type(ContentType::json())
-        .body(format!("{}", serde_json::to_string(&buses).unwrap())))
+    Ok(HttpResponse::build(StatusCode::OK).json(&buses))
 }
 
 #[get("/buses/{bus_number}")]
@@ -19,9 +16,7 @@ async fn read_bus(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
     let bus = actions::get_bus(path.into_inner().0).await.unwrap();
 
     match bus {
-        Some(bus_found) => Ok(HttpResponse::build(StatusCode::OK)
-            .content_type(ContentType::json())
-            .body(format!("{}", serde_json::to_string(&bus_found).unwrap()))),
+        Some(bus_found) => Ok(HttpResponse::build(StatusCode::OK).json(&bus_found)),
         None => Ok(HttpResponse::build(StatusCode::NOT_FOUND)
             .content_type(ContentType::json())
             .body("")),
@@ -31,9 +26,7 @@ async fn read_bus(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
 #[get("/stops")]
 async fn read_all_stops(params: web::Query<types::Offest>) -> Result<HttpResponse, Error> {
     match actions::get_stops(params.into_inner()).await {
-        Ok(buses) => Ok(HttpResponse::build(StatusCode::OK)
-            .content_type(ContentType::json())
-            .body(format!("{}", serde_json::to_string(&buses).unwrap()))),
+        Ok(buses) => Ok(HttpResponse::build(StatusCode::OK).json(&buses)),
         Err(err) => Ok(HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
             .content_type(ContentType::json())
             .body(format!("{}", err))),
@@ -44,9 +37,7 @@ async fn read_all_stops(params: web::Query<types::Offest>) -> Result<HttpRespons
 async fn read_stop(path: web::Path<(String,)>) -> Result<HttpResponse, Error> {
     match actions::get_stop(path.into_inner().0).await {
         Ok(buses_found) => match buses_found {
-            Some(bus) => Ok(HttpResponse::build(StatusCode::OK)
-                .content_type(ContentType::json())
-                .body(format!("{}", serde_json::to_string(&bus).unwrap()))),
+            Some(bus) => Ok(HttpResponse::build(StatusCode::OK).json(bus)),
             None => Ok(HttpResponse::build(StatusCode::NOT_FOUND)
                 .content_type(ContentType::json())
                 .body("")),

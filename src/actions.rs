@@ -106,43 +106,10 @@ pub async fn get_buses() -> Result<Vec<types::Bus>, Error> {
         .await
         .unwrap()
         .into_iter()
-        .map(|raw_bus| {
-            let destinations_vector = raw_bus
-                .name
-                .split('-')
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>();
-            let destinations: types::Destinations =
-                match destinations_vector.clone().into_iter().count() == 1 {
-                    true => {
-                        let destinations_vector: Vec<String> = destinations_vector[0]
-                            .split("/")
-                            .map(|s| s.into())
-                            .collect();
-                        types::Destinations {
-                            a: destinations_vector.clone(),
-                            b: None,
-                        }
-                    }
-                    false => types::Destinations {
-                        a: destinations_vector[0]
-                            .split("/")
-                            .map(|s| s.into())
-                            .collect(),
-                        b: Some(
-                            destinations_vector[1]
-                                .split("/")
-                                .map(|s| s.into())
-                                .collect(),
-                        ),
-                    },
-                };
-
-            types::Bus {
-                number: raw_bus.number,
-                id: raw_bus.id.parse().unwrap(),
-                destinations,
-            }
+        .map(|raw_bus| types::Bus {
+            number: raw_bus.number,
+            id: raw_bus.id.parse().unwrap(),
+            destinations: get_destinations(raw_bus.name),
         })
         .collect::<Vec<types::Bus>>())
 }
